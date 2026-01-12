@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e17"/>
+      <stop offset="100%" style="stop-color:#1a1f2e"/>
+    </linearGradient>
+    <linearGradient id="moonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bgGradient)" rx="80"/>
+  
+  <!-- Stars -->
+  <circle cx="100" cy="120" r="3" fill="#fff" opacity="0.6"/>
+  <circle cx="380" cy="80" r="2" fill="#fff" opacity="0.5"/>
+  <circle cx="420" cy="200" r="2.5" fill="#fff" opacity="0.7"/>
+  <circle cx="80" cy="300" r="2" fill="#fff" opacity="0.4"/>
+  <circle cx="150" cy="400" r="3" fill="#fff" opacity="0.5"/>
+  <circle cx="400" cy="380" r="2" fill="#fff" opacity="0.6"/>
+  <circle cx="320" cy="450" r="2.5" fill="#fff" opacity="0.4"/>
+  
+  <!-- Crescent Moon -->
+  <g filter="url(#glow)">
+    <path d="M256 100 
+             C320 100, 380 160, 380 256
+             C380 352, 320 412, 256 412
+             C220 412, 180 380, 160 340
+             C200 360, 240 340, 260 300
+             C280 260, 280 200, 240 160
+             C220 140, 180 140, 160 172
+             C180 124, 216 100, 256 100Z" 
+          fill="url(#moonGradient)"/>
+  </g>
+  
+  <!-- Subtle inner glow on moon -->
+  <path d="M256 120 
+           C310 120, 360 170, 360 256
+           C360 342, 310 392, 256 392
+           C230 392, 200 370, 180 340
+           C210 355, 240 340, 255 305
+           C270 270, 270 210, 240 175
+           C225 158, 200 158, 180 185
+           C195 145, 225 120, 256 120Z" 
+        fill="url(#moonGradient)" opacity="0.5"/>
+</svg>

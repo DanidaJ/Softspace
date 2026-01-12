@@ -1,0 +1,314 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   MIDNIGHT THEME - Professional Dark UI
+   Primary: Deep Muted Navy (not bright/shiny)
+   Accent: Soft Cyan for calm, therapeutic feel
+   ============================================================ */
+
+/* Theme tokens (dark default) */
+:root {
+  /* Backgrounds - Layered elevation system */
+  --color-bg: 10 14 23;          /* #0A0E17 - Base background */
+  --color-surface: 17 24 39;     /* #111827 - Cards, elevated surfaces (Gray-900) */
+  --color-elevated: 24 32 48;    /* #182030 - Modals, dropdowns, higher elevation */
+  
+  /* Accent colors - Refined blue palette */
+  --color-accent: 96 165 250;    /* #60A5FA - Blue-400, primary accent */
+  --color-accent-hover: 59 130 246; /* #3B82F6 - Blue-500, hover state */
+  
+  /* Text hierarchy */
+  --color-text: 248 250 252;     /* #F8FAFC - Slate-50, primary text */
+  --color-text-secondary: 203 213 225; /* #CBD5E1 - Slate-300, secondary text */
+  --color-muted: 100 116 139;    /* #64748B - Slate-500, muted/disabled */
+  --color-highlight: 147 197 253; /* #93C5FD - Blue-300, highlights/links */
+  
+  /* UI Elements */
+  --color-border: 30 41 59;      /* #1E293B - Slate-800, default borders */
+  --color-border-subtle: 51 65 85; /* #334155 - Slate-700, hover borders */
+  --color-divider: 30 41 59;     /* #1E293B - Section dividers */
+  
+  /* Semantic colors */
+  --color-success: 34 197 94;    /* Green-500 */
+  --color-warning: 245 158 11;   /* Amber-500 */
+  --color-danger: 239 68 68;     /* Red-500 */
+}
+
+/* Light mode - Improved with proper contrast */
+.theme-light {
+  /* Backgrounds - Soft grays, not pure white */
+  --color-bg: 241 245 249;       /* #f1f5f9 - Slate-100 */
+  --color-surface: 255 255 255;  /* Pure white for cards */
+  --color-elevated: 248 250 252; /* #f8fafc - Slate-50 */
+  
+  /* Accent colors - Darker for contrast */
+  --color-accent: 37 99 235;     /* #2563eb - Blue-600 */
+  --color-accent-hover: 29 78 216; /* #1d4ed8 - Blue-700 */
+  
+  /* Text - Dark colors for readability */
+  --color-text: 15 23 42;        /* #0f172a - Slate-900 */
+  --color-text-secondary: 51 65 85; /* #334155 - Slate-700 */
+  --color-muted: 100 116 139;    /* #64748b - Slate-500 */
+  --color-highlight: 29 78 216;  /* #1d4ed8 - Blue-700 for links */
+  
+  /* Borders - Visible but subtle */
+  --color-border: 203 213 225;   /* #cbd5e1 - Slate-300 */
+  --color-border-subtle: 226 232 240; /* #e2e8f0 - Slate-200 */
+  --color-divider: 226 232 240;  /* #e2e8f0 - Slate-200 */
+  
+  /* Semantic colors - Same */
+  --color-success: 34 197 94;
+  --color-warning: 245 158 11;
+  --color-danger: 239 68 68;
+}
+
+/* Light mode - Override hardcoded white text to dark */
+.theme-light .text-white {
+  color: rgb(15 23 42) !important; /* Slate-900 */
+}
+
+.theme-light .text-gray-100,
+.theme-light .text-gray-200,
+.theme-light .text-gray-300 {
+  color: rgb(51 65 85) !important; /* Slate-700 */
+}
+
+.theme-light .text-gray-400 {
+  color: rgb(71 85 105) !important; /* Slate-600 */
+}
+
+/* Preserve white text on colored/dark backgrounds in light mode */
+.theme-light .bg-midnight-accent .text-white,
+.theme-light .bg-gradient-to-r .text-white,
+.theme-light .bg-gradient-to-br .text-white,
+.theme-light .bg-red-500 .text-white,
+.theme-light .bg-green-500 .text-white,
+.theme-light button[class*="bg-midnight-accent"] .text-white,
+.theme-light [class*="bg-midnight-accent"] {
+  color: white !important;
+}
+
+/* Buttons with accent background should keep white text */
+.theme-light button.bg-midnight-accent,
+.theme-light .btn-primary {
+  color: white !important;
+}
+
+/* Fix placeholder text in light mode */
+.theme-light ::placeholder {
+  color: rgb(100 116 139) !important; /* Slate-500 */
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-midnight-bg text-midnight-text transition-colors duration-200;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Headings use Poppins */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  /* Custom scrollbar for webkit */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--color-bg));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-accent));
+  }
+}
+
+/* ============================================================
+   ANIMATION KEYFRAMES
+   ============================================================ */
+@layer utilities {
+  /* Page transitions */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out forwards;
+  }
+
+  /* Breathing exercise animations */
+  .animate-breathe-in {
+    animation: breatheIn 4s ease-in-out forwards;
+  }
+  
+  .animate-breathe-hold {
+    animation: breatheHold 4s ease-in-out forwards;
+  }
+  
+  .animate-breathe-out {
+    animation: breatheOut 6s ease-in-out forwards;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+  }
+  
+  .animate-ripple {
+    animation: ripple 2s ease-out infinite;
+  }
+
+  /* Glow effects */
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.3), 0 0 60px rgba(56, 189, 248, 0.1);
+  }
+  
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Breathing animations - calming, organic feel */
+@keyframes breatheIn {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes breatheHold {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+@keyframes breatheOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Landing page - subtle star twinkle (no movement, just opacity) */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle ease-in-out infinite;
+}
+
+/* Landing page - very slow breathe for gradient orbs */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 8s ease-in-out infinite;
+}

@@ -1,0 +1,116 @@
+# ==========================================
+# CRITICAL: Environment Files - NEVER COMMIT
+# ==========================================
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.*.local
+*.env
+
+# ==========================================
+# Dependencies
+# ==========================================
+node_modules/
+.pnp
+.pnp.js
+
+# ==========================================
+# Build Output
+# ==========================================
+dist/
+dist-ssr/
+build/
+.next/
+out/
+.nuxt/
+.cache/
+.parcel-cache/
+.vuepress/dist
+
+# ==========================================
+# Testing
+# ==========================================
+coverage/
+.nyc_output
+*.lcov
+
+# ==========================================
+# Logs
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# OS Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==========================================
+# IDEs and Editors
+# ==========================================
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==========================================
+# Misc
+# ==========================================
+.cache/
+.temp/
+.tmp/
+*.local
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# ==========================================
+# TypeScript
+# ==========================================
+*.tsbuildinfo
+
+# ==========================================
+# Optional npm cache
+# ==========================================
+.npm
+.eslintcache
+.stylelintcache
+
+# ==========================================
+# Yarn
+# ==========================================
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
