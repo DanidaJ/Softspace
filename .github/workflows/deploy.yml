@@ -10,10 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1️⃣ Login to GHCR
+      # Step 2: Login to GitHub Container Registry (GHCR)
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -21,29 +22,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2️⃣ Build & push backend
+      # Step 3: Build & push backend
       - name: Build & Push Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/DanidaJ/softspace-server:latest
+          tags: ghcr.io/danidaj/softspace-server:latest
           build-args: |
             ENVIRONMENT=production
 
-      # 3️⃣ Build & push frontend
+      # Step 4: Build & push frontend
       - name: Build & Push Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
-          tags: ghcr.io/DanidaJ/softspace-client:latest
+          tags: ghcr.io/danidaj/softspace-client:latest
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
             VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      # 4️⃣ Deploy on VPS via SSH
+      # Step 5: Deploy on VPS via SSH
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
@@ -52,6 +53,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /root/softspace
+            # Login to GHCR on VPS (required if images are private)
+            echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u danidaj --password-stdin
             docker compose pull
             docker compose up -d
             docker image prune -f
