@@ -142,3 +142,9 @@ coverage.xml
 *.old
 ssh_key
 ssh_key.pub
+deploy/build-and-upload.ps1
+safe-push.ps1
+PRE_PUSH_CHECKLIST.md
+futute.docx
+.gitignore
+deploy/VPS_DEPLOYMENT.md

@@ -1,12 +1,9 @@
 version: '3.8'
 
-# Production docker-compose for VPS
-# Uses pre-built images (no build context needed)
-
 services:
-  # Frontend - React/Vite client (pre-built)
+  # Frontend - React/Vite client
   client:
-    image: softspace-client:latest
+    image: ghcr.io/DanidaJ/softspace-client:latest
     container_name: softspace-client
     restart: unless-stopped
     networks:
@@ -15,9 +12,9 @@ services:
     depends_on:
       - server
 
-  # Backend - FastAPI server (pre-built)
+  # Backend - FastAPI server
   server:
-    image: softspace-server:latest
+    image: ghcr.io/DanidaJ/softspace-server:latest
     container_name: softspace-server
     restart: unless-stopped
     env_file:

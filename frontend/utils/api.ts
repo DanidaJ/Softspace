@@ -332,7 +332,7 @@ export const chatApi = {
 // ============ INSIGHTS API ============
 export const insightsApi = {
   getInsights: async (days = 7) => {
-    return apiRequest<InsightsData>(`/insights/?days=${days}`, { method: 'GET' });
+    return apiRequest<InsightsData>(`/insights/?days=${days}&generate_ai=true`, { method: 'GET' });
   },
 
   getTimeline: async (days = 7) => {
