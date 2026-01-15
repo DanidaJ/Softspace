@@ -44,10 +44,10 @@ export const GroundControl: React.FC = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 group flex items-center justify-center w-14 h-14 rounded-full bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)]"
+        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)]"
         title="SOS - Ground Control"
       >
-        <span className="text-2xl group-hover:scale-110 transition-transform">🚨</span>
+        <span className="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🚨</span>
       </button>
     );
   }

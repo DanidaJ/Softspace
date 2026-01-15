@@ -1,0 +1,11 @@
+# Deployment files
+*.log
+
+# Don't deploy local env files
+.env
+.env.local
+.env.development
+.env.production
+
+# Keep example files
+!.env.production.example

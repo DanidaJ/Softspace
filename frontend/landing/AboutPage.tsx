@@ -36,16 +36,15 @@ export const AboutPage: React.FC = () => {
               </h2>
 
               <div className="not-prose mb-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 rounded-2xl bg-midnight-surface border border-midnight-border">
-                  <div className="w-16 h-16 rounded-full border border-midnight-border bg-midnight-bg/50 flex items-center justify-center text-midnight-muted">
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 14a4 4 0 10-8 0v4h8v-4z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 12a4 4 0 100-8 4 4 0 000 8z" />
-                    </svg>
-                  </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 rounded-2xl bg-midnight-surface border border-midnight-border">
+                  <img 
+                    src="/profile.jpeg" 
+                    alt="Danida Jayakody" 
+                    className="w-44 h-44 rounded-full border-2 border-midnight-border object-cover"
+                  />
                   <div className="flex-1">
-                    <div className="font-heading text-lg font-semibold text-midnight-text">Your Name</div>
-                    <div className="text-sm text-midnight-textSecondary">Creator • Builder</div>
+                    <div className="font-heading text-lg font-semibold text-midnight-text">Danida Jayakody</div>
+                    <div className="text-sm text-midnight-textSecondary">Founder & Engineer</div>
                   </div>
                 </div>
               </div>

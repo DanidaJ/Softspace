@@ -1,0 +1,36 @@
+version: '3.8'
+
+# Production docker-compose for VPS
+# Uses pre-built images (no build context needed)
+
+services:
+  # Frontend - React/Vite client (pre-built)
+  client:
+    image: softspace-client:latest
+    container_name: softspace-client
+    restart: unless-stopped
+    networks:
+      - portfolio-net
+      - softspace-network
+    depends_on:
+      - server
+
+  # Backend - FastAPI server (pre-built)
+  server:
+    image: softspace-server:latest
+    container_name: softspace-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=production
+      - ALLOWED_ORIGINS=https://softspace.danidajay.com
+    networks:
+      - portfolio-net
+      - softspace-network
+
+networks:
+  softspace-network:
+    driver: bridge
+  portfolio-net:
+    external: true

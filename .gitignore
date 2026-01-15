@@ -140,3 +140,5 @@ coverage.xml
 *.bak
 *.backup
 *.old
+ssh_key
+ssh_key.pub
