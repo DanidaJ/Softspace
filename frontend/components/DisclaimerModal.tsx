@@ -9,7 +9,7 @@ interface DisclaimerModalProps {
 
 export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ onAccept }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [region, setRegion] = useState<string>('GLOBAL');
+  const [region, setRegion] = useState<string>('LK'); // Default to Sri Lanka
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +22,8 @@ export const DisclaimerModal: React.FC<DisclaimerModalProps> = ({ onAccept }) =>
 
   useEffect(() => {
     const inferred = getUserRegionCode();
-    if (inferred) setRegion(inferred);
+    // Only override default if we can detect a different region
+    if (inferred && inferred !== 'LK') setRegion(inferred);
   }, []);
 
   const selectedResources = getEmergencyResources(region);

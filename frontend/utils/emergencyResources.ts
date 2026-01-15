@@ -22,6 +22,25 @@ export type RegionResources = {
 // Core dataset of crisis resources by ISO country code.
 // Keep the list small, authoritative, and easy to extend.
 export const REGION_RESOURCES: Record<string, RegionResources> = {
+  LK: {
+    regionCode: 'LK',
+    label: 'Sri Lanka',
+    emergencyNumber: '119',
+    resources: [
+      {
+        name: 'National Mental Health Helpline (1926)',
+        description: '24/7 government mental health support line',
+        availability: '24/7',
+        actions: [{ label: 'Call 1926', href: 'tel:1926', kind: 'call' }]
+      },
+      {
+        name: 'Sumithrayo',
+        description: 'Suicide prevention and emotional support',
+        availability: 'Daily 9am–8pm',
+        actions: [{ label: 'Call 011-269-6666', href: 'tel:+94112696666', kind: 'call' }]
+      }
+    ]
+  },
   US: {
     regionCode: 'US',
     label: 'United States',
@@ -41,24 +60,6 @@ export const REGION_RESOURCES: Record<string, RegionResources> = {
         description: 'Text-based support from trained crisis counselors',
         availability: '24/7',
         actions: [{ label: 'Text "HELLO" to 741741', href: 'sms:741741?&body=HELLO', kind: 'text' }]
-      },
-      {
-        name: 'Veterans Crisis Line',
-        description: 'Support for veterans and service members',
-        availability: '24/7',
-        actions: [
-          { label: 'Call 988, then press 1', href: 'tel:988', kind: 'call' },
-          { label: 'Text 838255', href: 'sms:838255', kind: 'text' }
-        ]
-      },
-      {
-        name: 'The Trevor Project (LGBTQ+ youth)',
-        description: 'Crisis intervention for LGBTQ+ young people',
-        availability: '24/7',
-        actions: [
-          { label: 'Call 1-866-488-7386', href: 'tel:1-866-488-7386', kind: 'call' },
-          { label: 'Text "START" to 678678', href: 'sms:678678?&body=START', kind: 'text' }
-        ]
       }
     ]
   },
@@ -179,25 +180,6 @@ export const REGION_RESOURCES: Record<string, RegionResources> = {
       }
     ]
   },
-  LK: {
-    regionCode: 'LK',
-    label: 'Sri Lanka',
-    emergencyNumber: '119',
-    resources: [
-      {
-        name: 'National Mental Health Helpline (1926)',
-        description: '24/7 government mental health support line',
-        availability: '24/7',
-        actions: [{ label: 'Call 1926', href: 'tel:1926', kind: 'call' }]
-      },
-      {
-        name: 'Sumithrayo',
-        description: 'Suicide prevention and emotional support',
-        availability: 'Daily 9am–8pm',
-        actions: [{ label: 'Call 011-269-6666', href: 'tel:+94112696666', kind: 'call' }]
-      }
-    ]
-  },
   GLOBAL: {
     regionCode: 'GLOBAL',
     label: 'International',
@@ -214,13 +196,13 @@ export const REGION_RESOURCES: Record<string, RegionResources> = {
 };
 
 export const REGION_OPTIONS = [
+    { value: 'LK', label: REGION_RESOURCES.LK.label },
   { value: 'US', label: REGION_RESOURCES.US.label },
   { value: 'CA', label: REGION_RESOURCES.CA.label },
   { value: 'GB', label: REGION_RESOURCES.GB.label },
   { value: 'AU', label: REGION_RESOURCES.AU.label },
   { value: 'IN', label: REGION_RESOURCES.IN.label },
   { value: 'JP', label: REGION_RESOURCES.JP.label },
-  { value: 'LK', label: REGION_RESOURCES.LK.label },
   { value: 'EU', label: REGION_RESOURCES.EU.label },
   { value: 'GLOBAL', label: REGION_RESOURCES.GLOBAL.label }
 ];

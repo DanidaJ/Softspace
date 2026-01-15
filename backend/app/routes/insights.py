@@ -16,20 +16,25 @@ router = APIRouter(prefix="/insights", tags=["insights"])
 async def get_insights(
     request: Request,
     days: int = Query(default=7, le=30),
+    generate_ai: bool = Query(default=False, description="Generate AI insight (slower)"),
     user_id: str = Depends(get_current_user)
 ):
     """
     Get comprehensive insights based on real user data.
-    Includes mood trends, emotion patterns, triggers, and AI-generated insight.
+    Includes mood trends, emotion patterns, triggers.
+    Set generate_ai=true to include AI-generated insight (adds 1-2s latency).
     """
     try:
         client_tz = request.headers.get("X-Timezone", "UTC")
 
         insights = await get_user_insights(user_id, days, client_tz)
         
-        # Generate personalized AI insight
-        ai_insight = await generate_ai_insight(user_id, client_tz)
-        insights["daily_insight"] = ai_insight
+        # Only generate AI insight if explicitly requested (to avoid slow dashboard loads)
+        if generate_ai:
+            ai_insight = await generate_ai_insight(user_id, client_tz)
+            insights["daily_insight"] = ai_insight
+        else:
+            insights["daily_insight"] = "View your detailed insights to get AI-powered recommendations."
         
         return InsightsResponse(**insights)
     except Exception as e:

@@ -16,7 +16,6 @@ import {
   MoodPulseWidget,
   RecentSessionCard,
   ActiveGoalsWidget,
-  AIInsightWidget,
   WeeklyDigestWidget,
   ConversationStatsWidget,
   QuickActionsRow
@@ -61,6 +60,7 @@ export const Dashboard: React.FC = () => {
   const [showSessionsPanel, setShowSessionsPanel] = useState(true);
   const [sessionsLoaded, setSessionsLoaded] = useState(false);
   const [messagesLoadedForSession, setMessagesLoadedForSession] = useState<number | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
   
   // Current emotional state from chat (enhanced with dimensional model)
   const [currentEmotion, setCurrentEmotion] = useState<string | null>(null);
@@ -146,7 +146,7 @@ export const Dashboard: React.FC = () => {
   // Load chat sessions on mount
   useEffect(() => {
     loadSessions();
-    loadDashboardData();
+    loadDashboardData(); // Load immediately for faster perceived performance
   }, []);
 
   // Load dashboard data (insights + timeline)
@@ -273,11 +273,44 @@ export const Dashboard: React.FC = () => {
   };
 
   const startNewSession = async () => {
+    // Prevent multiple rapid clicks
+    if (isCreatingSession) return;
+    
+    setIsCreatingSession(true);
     try {
+      // Find any existing empty sessions (no messages or only the initial AI greeting)
+      const emptySessions = sessions.filter(session => 
+        !session.messageCount || session.messageCount === 0
+      );
+      
+      // Delete existing empty sessions before creating a new one
+      // This ensures only one blank chat exists at a time (like ChatGPT/Claude)
+      if (emptySessions.length > 0) {
+        await Promise.all(
+          emptySessions.map(session => api.chat.deleteSession(session.id))
+        );
+        
+        // Update sessions state immediately to prevent race conditions
+        const emptySessionIds = new Set(emptySessions.map(s => s.id));
+        setSessions(prevSessions => prevSessions.filter(s => !emptySessionIds.has(s.id)));
+      }
+      
       const result = await api.chat.createSession();
-      setCurrentSessionId(result.session_id);
+      const newSessionId = result.session_id;
+      
+      // Create new session object and add to sessions list immediately
+      const newSession: ChatSession = {
+        id: newSessionId,
+        title: 'New Chat',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        messageCount: 0,
+      };
+      setSessions(prevSessions => [newSession, ...prevSessions]);
+      
+      setCurrentSessionId(newSessionId);
       setMessages(INITIAL_MESSAGES);
-      setMessagesLoadedForSession(result.session_id); // Mark as loaded (empty new session)
+      setMessagesLoadedForSession(newSessionId);
       // Reset emotion state for new session - don't carry over from previous chats
       setCurrentEmotion(null);
       setEmotionScores(null);
@@ -285,24 +318,32 @@ export const Dashboard: React.FC = () => {
       setCrisisDetected(null);
       // Switch to chat view when starting a new session
       setCurrentView('chat');
-      loadSessions();
     } catch (error) {
       console.error('Failed to create session:', error);
+      // Fallback: reload sessions if something went wrong
+      loadSessions();
+    } finally {
+      setIsCreatingSession(false);
     }
   };
 
   const deleteSession = async (sessionId: number) => {
     try {
       await api.chat.deleteSession(sessionId);
+      
+      // Update sessions state immediately to prevent race conditions
+      setSessions(prevSessions => prevSessions.filter(s => s.id !== sessionId));
+      
       if (currentSessionId === sessionId) {
         setCurrentSessionId(null);
         setMessages(INITIAL_MESSAGES);
         setMessagesLoadedForSession(null);
         localStorage.removeItem('softspace_current_session_id');
       }
-      loadSessions();
     } catch (error) {
       console.error('Failed to delete session:', error);
+      // Reload sessions only if deletion failed
+      loadSessions();
     }
   };
 
@@ -505,9 +546,24 @@ export const Dashboard: React.FC = () => {
           </div>
           <span className="font-bold text-white tracking-wide">Softspace</span>
         </Link>
-        <button onClick={startChatSession} className="p-2 text-midnight-accent">
-           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-        </button>
+        <div className="flex items-center gap-1">
+          {currentView === 'chat' && (
+            <button 
+              onClick={() => setShowSessionsPanel(!showSessionsPanel)} 
+              className="p-2 text-midnight-muted hover:text-white transition-colors"
+              title="Chat History"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </button>
+          )}
+          {currentView !== 'chat' && (
+            <button onClick={startChatSession} className="p-2 text-midnight-accent">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* LEFT SIDEBAR */}
@@ -595,19 +651,19 @@ export const Dashboard: React.FC = () => {
         
         {/* HOME VIEW (Redesigned with Widgets) */}
         {currentView === 'home' && (
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 pt-20 lg:pt-8 animate-fade-in">
-             <div className="max-w-5xl mx-auto space-y-6">
+          <div className="flex-1 h-full overflow-hidden p-4 md:p-6 pt-20 lg:pt-6 animate-fade-in">
+             <div className="max-w-6xl mx-auto h-full flex flex-col space-y-3">
                 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+                <div className="flex-shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                   <div>
-                    <h1 className="font-heading text-2xl md:text-3xl font-semibold text-midnight-text tracking-tight">
+                    <h1 className="font-heading text-xl md:text-2xl font-semibold text-midnight-text tracking-tight">
                       {isNewUser 
                         ? `Welcome${user?.name ? `, ${user.name.split(' ')[0]}` : ''} `
                         : `Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`
                       }
                     </h1>
-                    <p className="text-midnight-textSecondary mt-1.5 text-sm">
+                    <p className="text-midnight-textSecondary mt-1 text-xs">
                       {isNewUser 
                         ? "We're glad you're here. Take your time to explore."
                         : "Here's how you've been doing"
@@ -617,17 +673,19 @@ export const Dashboard: React.FC = () => {
                 </div>
 
                 {/* Quick Actions Row */}
-                <QuickActionsRow 
-                  onChat={startChatSession}
-                  onBreathe={() => setCurrentView('tools')}
-                  onJournal={() => setCurrentView('journal')}
-                />
+                <div className="flex-shrink-0">
+                  <QuickActionsRow 
+                    onChat={startChatSession}
+                    onBreathe={() => setCurrentView('tools')}
+                    onJournal={() => setCurrentView('journal')}
+                  />
+                </div>
 
                 {/* Main Grid - 2 columns on desktop */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 overflow-hidden">
                    
                    {/* Left Column */}
-                   <div className="space-y-4">
+                   <div className="flex flex-col space-y-3 h-full overflow-y-auto">
                       {/* Mood Pulse */}
                       <MoodPulseWidget 
                         timeline={dashboardTimeline} 
@@ -654,13 +712,7 @@ export const Dashboard: React.FC = () => {
                    </div>
 
                    {/* Right Column */}
-                   <div className="space-y-4">
-                      {/* AI Insight */}
-                      <AIInsightWidget 
-                        insights={dashboardInsights} 
-                        loading={dashboardLoading} 
-                      />
-                      
+                   <div className="flex flex-col space-y-3 h-full overflow-y-auto">
                       {/* Weekly Digest (replaces check-in) */}
                       <WeeklyDigestWidget 
                         insights={dashboardInsights} 
@@ -873,6 +925,7 @@ export const Dashboard: React.FC = () => {
                onSelectSession={(id) => loadSessionMessages(id)}
                onNewSession={startNewSession}
                onDeleteSession={deleteSession}
+               isCreatingSession={isCreatingSession}
              />
           </div>
         )}

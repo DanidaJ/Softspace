@@ -98,10 +98,10 @@ async def get_session_messages(
             .select("id, created_at")\
             .eq("id", session_id)\
             .eq("user_id", user_id)\
-            .single()\
             .execute()
         
-        if not session.data:
+        # Check if session exists and belongs to user
+        if not session.data or len(session.data) == 0:
             raise HTTPException(status_code=404, detail="Session not found")
         
         # Get messages that have this session_id - use admin client
