@@ -187,6 +187,6 @@ If you encounter issues:
 - Google, Groq, and Mistral for AI capabilities
 - The open-source community
 
----
+----
 
 **Made with ❤️ for mental wellness**
