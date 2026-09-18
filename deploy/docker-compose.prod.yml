@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Frontend - React/Vite client
   client:
-    image: ghcr.io/DanidaJ/softspace-client:latest
+    image: ghcr.io/danidaj/softspace-client:latest
     container_name: softspace-client
     restart: unless-stopped
     networks:
@@ -14,7 +14,7 @@ services:
 
   # Backend - FastAPI server
   server:
-    image: ghcr.io/DanidaJ/softspace-server:latest
+    image: ghcr.io/danidaj/softspace-server:latest
     container_name: softspace-server
     restart: unless-stopped
     env_file:

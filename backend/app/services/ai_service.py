@@ -1,5 +1,6 @@
 import os
 import builtins
+import logging
 
 _SOFTSPACE_DEBUG_LOGS = os.getenv("SOFTSPACE_DEBUG_LOGS", "").strip().lower() in {
     "1",
@@ -41,9 +42,69 @@ groq_client = Groq(api_key=settings.groq_api_key)  # Emotion + Analytics
 mistral_client = Mistral(api_key=settings.mistral_api_key)  # Main Chat
 
 # Model constants
-MISTRAL_CHAT_MODEL = "mistral-large-latest"  # Main therapeutic conversations
-GROQ_EMOTION_MODEL = "llama-3.1-8b-instant"  # Fast emotion extraction
-GROQ_ANALYSIS_MODEL = "llama-3.3-70b-versatile"  # Deep analysis & insights
+# mistral-large-latest is paid-tier only and returns 403 tier_not_allowed on
+# the free tier; override via env if the account is upgraded.
+MISTRAL_CHAT_MODEL = os.getenv("MISTRAL_CHAT_MODEL", "mistral-small-latest")  # Main therapeutic conversations
+# Groq retires models regularly; the llama-3.x ids previously used here now
+# 404 with model_not_found. Verify against `client.models.list()` before
+# changing these, and prefer overriding by env over editing the defaults.
+GROQ_EMOTION_MODEL = os.getenv("GROQ_EMOTION_MODEL", "openai/gpt-oss-20b")  # Fast emotion extraction
+GROQ_ANALYSIS_MODEL = os.getenv("GROQ_ANALYSIS_MODEL", "openai/gpt-oss-120b")  # Deep analysis & insights
+GROQ_CHAT_MODEL = os.getenv("GROQ_CHAT_MODEL", "openai/gpt-oss-120b")  # Chat fallback
+
+# Module-level `print` is routed to _debug_print above and is off unless
+# SOFTSPACE_DEBUG_LOGS is set, so provider failures go through logging instead
+# and stay visible in production.
+logger = logging.getLogger(__name__)
+
+
+def _generate_chat_response(messages: List[Dict]) -> tuple:
+    """
+    Produce a chat completion, trying Mistral first and falling back to Groq.
+
+    Mistral's free tier returns 403 (tier_not_allowed) or 429 (rate_limited)
+    readily. Degrading to another live model is far better than the canned
+    reply, which reads as a real therapeutic response while the AI is down.
+    Raises only if every provider fails.
+    """
+    errors = []
+
+    try:
+        response = mistral_client.chat.complete(
+            model=MISTRAL_CHAT_MODEL,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=1024
+        )
+        text = (response.choices[0].message.content or "").strip()
+        if not text:
+            raise RuntimeError(f"mistral/{MISTRAL_CHAT_MODEL} returned empty content")
+        return text, "mistral"
+    except Exception as e:
+        errors.append(f"mistral/{MISTRAL_CHAT_MODEL}: {e}")
+        logger.warning("Mistral chat failed, falling back to Groq: %s", e)
+
+    try:
+        response = groq_client.chat.completions.create(
+            model=GROQ_CHAT_MODEL,
+            messages=messages,
+            temperature=0.7,
+            # Larger than the Mistral budget: gpt-oss models spend part of it
+            # on reasoning tokens, which would otherwise starve the reply.
+            max_tokens=2048
+        )
+        text = (response.choices[0].message.content or "").strip()
+        if not text:
+            raise RuntimeError(
+                f"groq/{GROQ_CHAT_MODEL} returned empty content "
+                f"(finish_reason={response.choices[0].finish_reason})"
+            )
+        return text, "groq"
+    except Exception as e:
+        errors.append(f"groq/{GROQ_CHAT_MODEL}: {e}")
+        logger.error("Groq chat fallback also failed: %s", e)
+
+    raise RuntimeError("all chat providers failed -> " + " | ".join(errors))
 
 # ============================================================
 # USER CONTEXT MANAGEMENT
@@ -552,7 +613,7 @@ If the message is just a greeting or general update with no specific topic, retu
             model=GROQ_EMOTION_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=512
+            max_tokens=912
         )
         
         response_text = completion.choices[0].message.content.strip()
@@ -779,7 +840,7 @@ Return ONLY the title, nothing else. Examples:
             model=GROQ_EMOTION_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=20
+            max_tokens=420
         )
         
         title = completion.choices[0].message.content.strip()[:50]
@@ -1076,15 +1137,8 @@ GUIDELINES:
     messages.append({"role": "user", "content": user_message})
     
     try:
-        # Use Mistral Large for therapeutic conversation
-        response = mistral_client.chat.complete(
-            model=MISTRAL_CHAT_MODEL,
-            messages=messages,
-            temperature=0.7,
-            max_tokens=1024
-        )
-        
-        response_text = response.choices[0].message.content.strip()
+        # Mistral for therapeutic conversation, with Groq as a live fallback
+        response_text, provider_used = _generate_chat_response(messages)
         
         # Update context with new emotional data
         await update_user_context(
@@ -1106,7 +1160,7 @@ GUIDELINES:
             "needs_support": emotion_data.get("needs_support", False),
             "crisis_level": crisis_level,
             "crisis_keywords": crisis_keywords,
-            "model_used": "mistral",
+            "model_used": provider_used,
             "suggested_goal": suggested_goal  # AI-detected goal suggestion for frontend
         }
         
@@ -1117,7 +1171,8 @@ GUIDELINES:
         return result
     
     except Exception as e:
-        print(f"Mistral error: {e}")
+        # logger, not the shadowed print, so this is never silently discarded
+        logger.exception("Chat generation failed, returning fallback text: %s", e)
         return {
             "response": "I'm here to support you. Could you tell me more about what's on your mind?",
             "session_id": session_id,
@@ -1126,7 +1181,7 @@ GUIDELINES:
             "sentiment": "neutral",
             "detected_topics": [],
             "needs_support": False,
-            "model_used": "mistral"
+            "model_used": "fallback"
         }
 
 # Legacy alias for backward compatibility
@@ -1780,7 +1835,7 @@ Return ONLY the insight text, nothing else."""
             model=GROQ_ANALYSIS_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=150
+            max_tokens=550
         )
         return completion.choices[0].message.content.strip()
     except:
@@ -1818,7 +1873,7 @@ Be warm, not clinical. Return ONLY the feedback text."""
             model=GROQ_ANALYSIS_MODEL,
             messages=[{"role": "user", "content": feedback_prompt}],
             temperature=0.7,
-            max_tokens=200
+            max_tokens=600
         )
         ai_feedback = completion.choices[0].message.content.strip()
     except:
@@ -1895,7 +1950,7 @@ Return ONLY valid JSON, no other text."""
             model=GROQ_ANALYSIS_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=500
+            max_tokens=900
         )
         
         response_text = completion.choices[0].message.content.strip()
