@@ -11,6 +11,11 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    # Required so GITHUB_TOKEN can push images to GHCR
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       # Step 1: Checkout the repo
       - name: Checkout repository
