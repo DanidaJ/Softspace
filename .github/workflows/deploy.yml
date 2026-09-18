@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - production
+  # Allows manually triggering this workflow from the GitHub Actions tab
+  workflow_dispatch:
+
+# Required so GITHUB_TOKEN can push images to GHCR
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build-and-deploy:
