@@ -26,8 +26,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: danidaj
-          password: ${{ secrets.GHCR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT  }}
 
       # Step 3: Build & push backend
       - name: Build & Push Backend
